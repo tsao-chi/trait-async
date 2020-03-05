@@ -104,15 +104,15 @@ pub fn expand(input: &mut Item, is_local: bool) {
 //     async fn f<T>(&self, x: &T) -> Ret;
 //
 // Output:
-//     fn f<'life0, 'life1, 'async_trait, T>(
+//     fn f<'life0, 'life1, 'trait_async, T>(
 //         &'life0 self,
 //         x: &'life1 T,
-//     ) -> Pin<Box<dyn Future<Output = Ret> + Send + 'async_trait>>
+//     ) -> Pin<Box<dyn Future<Output = Ret> + Send + 'trait_async>>
 //     where
-//         'life0: 'async_trait,
-//         'life1: 'async_trait,
-//         T: 'async_trait,
-//         Self: Sync + 'async_trait;
+//         'life0: 'trait_async,
+//         'life1: 'trait_async,
+//         T: 'trait_async,
+//         Self: Sync + 'trait_async;
 fn transform_sig(
     context: Context,
     sig: &mut Signature,
@@ -153,13 +153,13 @@ fn transform_sig(
                 let param = &param.ident;
                 where_clause
                     .predicates
-                    .push(parse_quote!(#param: 'async_trait));
+                    .push(parse_quote!(#param: 'trait_async));
             }
             GenericParam::Lifetime(param) => {
                 let param = &param.lifetime;
                 where_clause
                     .predicates
-                    .push(parse_quote!(#param: 'async_trait));
+                    .push(parse_quote!(#param: 'trait_async));
             }
             GenericParam::Const(_) => {}
         }
@@ -168,9 +168,9 @@ fn transform_sig(
         sig.generics.params.push(parse_quote!(#elided));
         where_clause
             .predicates
-            .push(parse_quote!(#elided: 'async_trait));
+            .push(parse_quote!(#elided: 'trait_async));
     }
-    sig.generics.params.push(parse_quote!('async_trait));
+    sig.generics.params.push(parse_quote!('trait_async));
     if has_self {
         let bound: Ident = match sig.inputs.iter().next() {
             Some(FnArg::Receiver(Receiver {
@@ -185,9 +185,9 @@ fn transform_sig(
             Context::Impl { .. } => true,
         };
         where_clause.predicates.push(if assume_bound || is_local {
-            parse_quote!(Self: 'async_trait)
+            parse_quote!(Self: 'trait_async)
         } else {
-            parse_quote!(Self: ::core::marker::#bound + 'async_trait)
+            parse_quote!(Self: ::core::marker::#bound + 'trait_async)
         });
     }
 
@@ -210,9 +210,9 @@ fn transform_sig(
     }
 
     let bounds = if is_local {
-        quote!('async_trait)
+        quote!('trait_async)
     } else {
-        quote!(::core::marker::Send + 'async_trait)
+        quote!(::core::marker::Send + 'trait_async)
     };
 
     sig.output = parse_quote! {
@@ -231,7 +231,7 @@ fn transform_sig(
 //     async fn f<T, AsyncTrait>(_self: &AsyncTrait, x: &T) -> Ret {
 //         _self + x
 //     }
-//     Box::pin(async_trait_method::<T, Self>(self, x))
+//     Box::pin(trait_async_method::<T, Self>(self, x))
 fn transform_block(
     context: Context,
     sig: &mut Signature,
@@ -297,7 +297,7 @@ fn transform_block(
     }
 
     if has_async_lifetime(&mut standalone, block) {
-        standalone.generics.params.push(parse_quote!('async_trait));
+        standalone.generics.params.push(parse_quote!('trait_async));
     }
 
     let mut types = standalone

@@ -36,20 +36,20 @@
 //! This example implements the core of a highly effective advertising platform
 //! using async fn in a trait.
 //!
-//! The only thing to notice here is that we write an `#[async_trait]` macro on
+//! The only thing to notice here is that we write an `#[trait_async]` macro on
 //! top of traits and trait impls that contain async fn, and then they work.
 //!
 //! ```
-//! use async_trait::async_trait;
+//! use trait_async::trait_async;
 //!
-//! #[async_trait]
+//! #[trait_async]
 //! trait Advertisement {
 //!     async fn run(&self);
 //! }
 //!
 //! struct Modal;
 //!
-//! #[async_trait]
+//! #[trait_async]
 //! impl Advertisement for Modal {
 //!     async fn run(&self) {
 //!         self.render_fullscreen().await;
@@ -64,7 +64,7 @@
 //!     media_url: String,
 //! }
 //!
-//! #[async_trait]
+//! #[trait_async]
 //! impl Advertisement for AutoplayingVideo {
 //!     async fn run(&self) {
 //!         let stream = connect(&self.media_url).await;
@@ -94,7 +94,7 @@
 //! # Supported features
 //!
 //! It is the intention that all features of Rust traits should work nicely with
-//! #\[async_trait\], but the edge cases are numerous. Please file an issue if
+//! #\[trait_async\], but the edge cases are numerous. Please file an issue if
 //! you see unexpected borrow checker errors, type errors, or warnings. There is
 //! no use of `unsafe` in the expanded code, so rest assured that if your code
 //! compiles it can't be that badly broken.
@@ -143,7 +143,7 @@
 //!
 //! Not all async traits need futures that are `dyn Future + Send`. To avoid
 //! having Send and Sync bounds placed on the async trait methods, invoke the
-//! async trait macro as `#[async_trait(?Send)]` on both the trait and the impl
+//! async trait macro as `#[trait_async(?Send)]` on both the trait and the impl
 //! blocks.
 //!
 //! <br>
@@ -151,18 +151,18 @@
 //! # Elided lifetimes
 //!
 //! Be aware that async fn syntax does not allow lifetime elision outside of `&`
-//! and `&mut` references. (This is true even when not using #\[async_trait\].)
+//! and `&mut` references. (This is true even when not using #\[trait_async\].)
 //! Lifetimes must be named or marked by the placeholder `'_`.
 //!
 //! Fortunately the compiler is able to diagnose missing lifetimes with a good
 //! error message.
 //!
 //! ```compile_fail
-//! # use async_trait::async_trait;
+//! # use trait_async::trait_async;
 //! #
 //! type Elided<'a> = &'a usize;
 //!
-//! #[async_trait]
+//! #[trait_async]
 //! trait Test {
 //!     async fn test(not_okay: Elided, okay: &usize) {}
 //! }
@@ -179,16 +179,16 @@
 //! The fix is to name the lifetime or use `'_`.
 //!
 //! ```
-//! # use async_trait::async_trait;
+//! # use trait_async::trait_async;
 //! #
 //! # type Elided<'a> = &'a usize;
 //! #
-//! #[async_trait]
+//! #[trait_async]
 //! trait Test {
 //!     // either
 //!     async fn test<'e>(elided: Elided<'e>) {}
 //! # }
-//! # #[async_trait]
+//! # #[trait_async]
 //! # trait Test2 {
 //!     // or
 //!     async fn test(elided: Elided<'_>) {}
@@ -204,9 +204,9 @@
 //! by value, no associated types, etc.
 //!
 //! ```
-//! # use async_trait::async_trait;
+//! # use trait_async::trait_async;
 //! #
-//! #[async_trait]
+//! #[trait_async]
 //! pub trait ObjectSafe {
 //!     async fn f(&self);
 //!     async fn g(&mut self);
@@ -220,7 +220,7 @@
 //! #
 //! # struct MyType;
 //! #
-//! # #[async_trait]
+//! # #[trait_async]
 //! # impl ObjectSafe for MyType {
 //! #     async fn f(&self) {}
 //! #     async fn g(&mut self) {}
@@ -232,7 +232,7 @@
 //!
 //! The one wrinkle is in traits that provide default implementations of async
 //! methods. In order for the default implementation to produce a future that is
-//! Send, the async_trait macro must emit a bound of `Self: Sync` on trait
+//! Send, the trait_async macro must emit a bound of `Self: Sync` on trait
 //! methods that take `&self` and a bound `Self: Send` on trait methods that
 //! take `&mut self`. An example of the former is visible in the expanded code
 //! in the explanation section above.
@@ -258,16 +258,16 @@
 //! the default implementations are applicable to them:
 //!
 //! ```
-//! # use async_trait::async_trait;
+//! # use trait_async::trait_async;
 //! #
-//! #[async_trait]
+//! #[trait_async]
 //! pub trait ObjectSafe: Sync {  // added supertrait
 //!     async fn can_dyn(&self) {}
 //! }
 //! #
 //! # struct MyType;
 //! #
-//! # #[async_trait]
+//! # #[trait_async]
 //! # impl ObjectSafe for MyType {}
 //! #
 //! # let value = MyType;
@@ -279,9 +279,9 @@
 //! bounding them with `Self: Sized`:
 //!
 //! ```
-//! # use async_trait::async_trait;
+//! # use trait_async::trait_async;
 //! #
-//! #[async_trait]
+//! #[trait_async]
 //! pub trait ObjectSafe {
 //!     async fn cannot_dyn(&self) where Self: Sized {}
 //!
@@ -290,7 +290,7 @@
 //! #
 //! # struct MyType;
 //! #
-//! # #[async_trait]
+//! # #[trait_async]
 //! # impl ObjectSafe for MyType {}
 //! #
 //! # let value = MyType;
@@ -314,7 +314,7 @@ use quote::quote;
 use syn::parse_macro_input;
 
 #[proc_macro_attribute]
-pub fn async_trait(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn trait_async(args: TokenStream, input: TokenStream) -> TokenStream {
     let args = parse_macro_input!(args as Args);
     let mut item = parse_macro_input!(input as Item);
     expand(&mut item, args.local);

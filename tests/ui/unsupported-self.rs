@@ -1,11 +1,11 @@
-use async_trait::async_trait;
+use trait_async::trait_async;
 
-#[async_trait]
+#[trait_async]
 pub trait Trait {
     async fn method();
 }
 
-#[async_trait]
+#[trait_async]
 impl Trait for &'static str {
     async fn method() {
         let _ = Self;

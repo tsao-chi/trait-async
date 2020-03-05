@@ -31,6 +31,6 @@ fn try_parse(input: ParseStream) -> Result<Args> {
 }
 
 fn error() -> Error {
-    let msg = "expected #[async_trait] or #[async_trait(?Send)]";
+    let msg = "expected #[trait_async] or #[trait_async(?Send)]";
     Error::new(Span::call_site(), msg)
 }

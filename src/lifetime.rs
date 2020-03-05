@@ -13,7 +13,7 @@ struct HasAsyncLifetime(bool);
 
 impl VisitMut for HasAsyncLifetime {
     fn visit_lifetime_mut(&mut self, life: &mut Lifetime) {
-        self.0 |= life.to_string() == "'async_trait";
+        self.0 |= life.to_string() == "'trait_async";
     }
 
     fn visit_item_mut(&mut self, _: &mut Item) {

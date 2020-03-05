@@ -1,9 +1,9 @@
-use async_trait::async_trait;
+use trait_async::trait_async;
 use std::sync::Mutex;
 
 async fn f() {}
 
-#[async_trait]
+#[trait_async]
 trait Test {
     async fn test(&self) {
         let mutex = Mutex::new(());

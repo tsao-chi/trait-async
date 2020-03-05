@@ -1,17 +1,17 @@
-use async_trait::async_trait;
+use trait_async::trait_async;
 
 macro_rules! picky {
     (ident) => {};
 }
 
-#[async_trait]
+#[trait_async]
 trait Trait {
     async fn method();
 }
 
 struct Struct;
 
-#[async_trait]
+#[trait_async]
 impl Trait for Struct {
     async fn method() {
         picky!({ 123 });

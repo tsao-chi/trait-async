@@ -1,19 +1,19 @@
 [package]
-name = "async-trait"
+name = "trait-async"
 version = "0.1.24"
-authors = ["David Tolnay <dtolnay@gmail.com>"]
+authors = ["ㄗㄠˋ ㄑㄧˊ <tsao-chi@the-lingo.org>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Type erasure for async trait methods"
-repository = "https://github.com/dtolnay/async-trait"
-documentation = "https://docs.rs/async-trait"
+repository = "https://github.com/tsao-chi/trait-async"
+documentation = "https://docs.rs/trait-async"
 readme = "README.md"
 
 [lib]
 proc-macro = true
 
 [badges]
-travis-ci = { repository = "dtolnay/async-trait" }
+travis-ci = { repository = "tsao-chi/trait-async" }
 
 [dependencies]
 proc-macro2 = "1.0"
